@@ -6,11 +6,31 @@ import { z } from "zod";
 import jwt from "jsonwebtoken";
 // import { log } from "node:console";
 
+const signupSchema = z.object({
+   username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const signinSchema = z.object({
+  email: z.email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
 
 export const signup = async (req: Request, res: Response) => {
+
   try{
+     const result = signupSchema.safeParse(req.body);
+
+      if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.issues,
+      });
+    }
    
-    const {password , username , email} = req.body;
+    const {password , username , email} = result.data;
+
       // Step 2: Check if user already exists
     const existingUser = await User.findOne({ email });
 
@@ -43,7 +63,16 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try{
-     const { email, password } = req.body;
+    const result = signinSchema.safeParse(req.body);
+
+      if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.issues,
+      });
+    }
+
+     const { email, password } = result.data;
+     
       // Find user
     const user = await User.findOne({ email });
     if (!user) {
