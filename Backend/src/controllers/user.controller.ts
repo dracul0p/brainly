@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 // import model
-import  {User}  from "../models/user.model";
+import { User } from "../models/user.model";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
+import { env } from "../config/env";
 // import { log } from "node:console";
 
 const signupSchema = z.object({
-   username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.email("Invalid email"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const signinSchema = z.object({
@@ -17,21 +18,19 @@ const signinSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-
 export const signup = async (req: Request, res: Response) => {
+  try {
+    const result = signupSchema.safeParse(req.body);
 
-  try{
-     const result = signupSchema.safeParse(req.body);
-
-      if (!result.success) {
+    if (!result.success) {
       return res.status(400).json({
         errors: result.error.issues,
       });
     }
-   
-    const {password , username , email} = result.data;
 
-      // Step 2: Check if user already exists
+    const { password, username, email } = result.data;
+
+    // Step 2: Check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -39,9 +38,9 @@ export const signup = async (req: Request, res: Response) => {
         message: "User already exists",
       });
     }
-       // Step 3: Hash password
+    // Step 3: Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = await User.create({
       username,
       email,
@@ -52,28 +51,27 @@ export const signup = async (req: Request, res: Response) => {
       message: "User created successfully",
       user,
     });
-
-  }catch(error){
-     console.error("Signup Error:", error);
-      return res.status(500).json({
+  } catch (error) {
+    console.error("Signup Error:", error);
+    return res.status(500).json({
       message: "Server Error in signup",
     });
   }
 };
 
 export const signin = async (req: Request, res: Response) => {
-  try{
+  try {
     const result = signinSchema.safeParse(req.body);
 
-      if (!result.success) {
+    if (!result.success) {
       return res.status(400).json({
         errors: result.error.issues,
       });
     }
 
-     const { email, password } = result.data;
-     
-      // Find user
+    const { email, password } = result.data;
+
+    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -81,28 +79,23 @@ export const signin = async (req: Request, res: Response) => {
       });
     }
     // Compare password
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
     }
 
-     // Generate JWT
-    const token = jwt.sign( { userId: user._id},process.env.JWT_SECRET as string,{expiresIn: "7d"}
-    );
-    
-
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, env.JWT_SECRET as string, {
+      expiresIn: "7d",
+    });
     return res.status(200).json({
       message: "Signin successful",
       user,
-      token
+      token,
     });
-    
-  }catch(error){
+  } catch (error) {
     console.error("Signin Error:", error);
     return res.status(500).json({
       message: "Server Error in signin",
@@ -110,16 +103,14 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-
-  export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response) => {
   try {
-   const users = await User.find().select("-password");
+    const users = await User.find().select("-password");
 
     return res.status(200).json({
       count: users.length,
       users,
     });
-
   } catch (error) {
     console.error("Get Users Error:", error);
 
