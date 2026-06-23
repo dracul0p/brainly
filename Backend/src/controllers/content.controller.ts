@@ -58,9 +58,9 @@ export const deleteContent = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     const { contentId } = req.params;
-  
-    console.log("contentId:", contentId);
-    console.log("userId:", req.userId);
+
+    // console.log("contentId:", contentId);
+    // console.log("userId:", req.userId);
 
     if (!contentId) {
       return res.status(400).json({ message: "ContentId missing" });
@@ -82,4 +82,35 @@ export const deleteContent = async (req: AuthRequest, res: Response) => {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
+};
+
+export const manageShareLink = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // TODO: implement share link logic (generate token, store, return URL)
+    res.json({ message: "Share link feature coming soon" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// search functionlity:---->
+export const searchContent = async (req: AuthRequest, res: Response) => {
+  try {
+    const q = (req.query.q as string) || "";
+    const contents = await ContentModel.find({
+      // userId: req.userId,
+      $or: [
+        { title: { $regex: q, $options: "i" } },
+        { type: { $regex: q, $options: "i" } },
+        { tags: { $regex: q, $options: "i" } },
+      ],
+    });
+    res.json({ contents });
+  } catch (error) {}
 };
