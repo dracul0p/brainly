@@ -37,7 +37,7 @@ export const authMiddleware = (
         message: "Invalid token format",
       });
     }
-   // Verify token
+    // Verify token
     const decoded = jwt.verify(token, env.JWT_SECRET);
     // make sure ist (jwtpayload not string)
     if (typeof decoded === "string") {
@@ -54,10 +54,11 @@ export const authMiddleware = (
     //   next();
     // }
 
+    // console.log("DECODED JWT:", decoded);
+
     // Type assertion for payload
     const payload = decoded as TokenPayload;
-
-    req.userId = payload.id; // ✅ no ts-ignore needed
+    req.userId = payload.userId; // ✅ no ts-ignore needed
     next();
   } catch (error) {
     return res.status(401).json({

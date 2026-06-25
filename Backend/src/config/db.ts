@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
+import { env } from "../config/env";
 
 export const connectDB = async () =>{
   try{
-     const uri = process.env.MONGO_URI;
+     const uri = env.DB_URL;
      if (!uri) {
-      throw new Error("MONGO_URI is missing in .env file");
+      throw new Error("DB_URL is missing in .env file");
     }
 
     await mongoose.connect(uri);

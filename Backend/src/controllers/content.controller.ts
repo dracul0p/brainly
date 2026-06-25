@@ -7,6 +7,7 @@ interface AuthRequest extends Request {
   userId?: string;
 }
 
+// user gets its own content
 export const getAllContent = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.userId) {
@@ -22,6 +23,7 @@ export const getAllContent = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// user add content
 export const addContent = async (req: AuthRequest, res: Response) => {
   try {
     const { title, body, type, tags, link } = req.body;
@@ -52,6 +54,7 @@ export const addContent = async (req: AuthRequest, res: Response) => {
   }
 };
 
+//user can delete it own content
 export const deleteContent = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.userId) {
@@ -97,7 +100,6 @@ export const manageShareLink = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 // search functionlity:---->
 export const searchContent = async (req: AuthRequest, res: Response) => {

@@ -5,27 +5,22 @@ import { connectDB } from "./config/db";
 // import cors from "cors";
 
 import userRoutes from "./routes/user.routes";
+import contentRoutes from "./routes/content.routes";
 
 const port = process.env.PORT || 5000;
-
 
 const app = express();
 // app.use(cors());
 app.use(express.json());
 
+app.use("/api/v1/", userRoutes);
+app.use("/api/v1/content",contentRoutes );
+
 app.get("/", (req, res) => {
   res.send("hi");
 });
 
-app.use("/api/v1/", userRoutes);
 
-app.get("/api/v1/content", (req, res) => {
-  res.send("Hello World");
-});
-
-app.delete("/api/v1/content", (req, res) => {
-  res.send("Hello World");
-});
 
 // Create a shareable link for your second brain
 app.post("/api/v1/brain/share", (req, res) => {
@@ -45,7 +40,7 @@ const startServer = async () => {
       console.log(`Server running on port ${port}`);
     });
   } catch (err) {
-    console.error("DB connection failed:", err);
+    console.error("DB or server connection failed:", err);
     process.exit(1);
   }
 };
