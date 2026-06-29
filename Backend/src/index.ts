@@ -6,6 +6,7 @@ import { connectDB } from "./config/db";
 
 import userRoutes from "./routes/user.routes";
 import contentRoutes from "./routes/content.routes";
+import publicRoutes from "./routes/public.routes";
 
 const port = process.env.PORT || 5000;
 
@@ -14,24 +15,12 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/v1/", userRoutes);
-app.use("/api/v1/content",contentRoutes );
+app.use("/api/v1/content", contentRoutes);
+app.use("/api/v1", publicRoutes);
 
 app.get("/", (req, res) => {
   res.send("hi");
 });
-
-
-
-// Create a shareable link for your second brain
-app.post("/api/v1/brain/share", (req, res) => {
-  res.send("Hello World");
-});
-
-// Fetch another user's shared brain content
-app.get("/api/v1/brain/share", (req, res) => {
-  res.send("Hello World");
-});
-
 
 const startServer = async () => {
   try {
